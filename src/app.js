@@ -34,7 +34,19 @@ app.use(express.static("public"))
 //cookie config work = accept cookie, set cookie form user browser(CRUD)
 app.use(cookieParser())
 
+//routes
+import userRouter from "./route/user.route.js"
+
+//route decleration
+app.use("/api/v1/users",userRouter)
+
+
+// example:  http://localhost:8000/api/v1/users/register
 export { app }
+
+
+
+
 
 // req.pramps = request from url
 //req.body = json,forms

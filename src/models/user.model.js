@@ -4,7 +4,7 @@ import jwt  from "jsonwebtoken";
 
 const userSchema = new Schema(
     {
-        uerName: {
+        userName: {
             type: String,
             required: true,
             unique: true,
@@ -12,13 +12,7 @@ const userSchema = new Schema(
             trim: true,
             index: true
         },
-        uerName: {
-            type: String,
-            required: true,
-            unique: true,
-            lowercase: true,
-            trim: true,
-        },
+     
         fullName: {
             type: String,
             required: true,
@@ -61,7 +55,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
   return  await bcrypt.compare(password,this.password)
 }
 
-// injecting accesstoken doesnot store in database
+// injecting accesstoken (doesnot store in database)
 userSchema.methods.generateAccessToken = function(){
    return jwt.sign(
         {
