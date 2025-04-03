@@ -22,7 +22,6 @@ app.use(express
 //url encoded
 app.use(express.urlencoded({
     extended:true, //accept object inside object
-    limit:"16kb"
 }));
 
 //public accets
@@ -33,7 +32,9 @@ app.use(cookieParser());
 
 //middleware for routes
 import user_router from "./routes/user.routers.js";
-app.use("/api/v1",user_router);
+import user_video_router from "./routes/user.video.routes.js"
+app.use("/api/v1/user",user_router);
+app.use("/api/v1/video",user_video_router)
 
 //global error handler
 app.use(ErrorMiddleware)

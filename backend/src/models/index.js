@@ -10,8 +10,12 @@ db.video=Video;
 
 //with user
 db.user.hasMany(db.video,{
-    foreignKey: "user_Id"
+    foreignKey: "videoOwner",
+    as:"videos"
 });
 db.video.belongsTo(db.user,{
-    foreignKey: "user_Id"
-})
+    foreignKey: "videoOwner",
+    as:"user"
+});
+
+export default db;

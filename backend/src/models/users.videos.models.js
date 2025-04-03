@@ -5,14 +5,22 @@ import User from "./users.models.js";
 const Video = sequelize.define(
     'Video',
     {
-        video_id: {
+        videoId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
             autoIncrement: true   
         },
-
-        video_file: {
+        videoOwner:{
+            type:DataTypes.INTEGER,
+            allowNull:false,
+            references:{
+                modelName:"User",
+                key: "userId"
+            },
+            onDelete: "CASCADE"
+        },
+        videoFile: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -32,18 +40,13 @@ const Video = sequelize.define(
             allowNull: false
         },
 
-        duration: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-
         views: {
             type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 0
         },
 
-        is_published: {
+        isPublished: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },

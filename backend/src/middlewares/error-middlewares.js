@@ -1,20 +1,19 @@
 const errorMiddlewares = (err, req, res, next) => {
-    // Handle Sequelize validation errors
     if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
-        const errors = err.errors.map(error => ({
-            field: error.path,
-            message: error.message,
-            type: error.type.includes('Validation') ? 'VALIDATION_ERROR' : error.type
+        // error messages from Sequelize model
+        const cleanErrors = err.errors.map(error => ({
+          field: error.path,       // fields errors like email,passwd etc
+          message: error.message,  // The error message custom message from model
+          type: 'VALIDATION_ERROR' //  these are validation errors
         }));
-        
+    
         return res.status(400).json({
-            success: false,
-            statusCode: 400,
-            message: "Validation failed",
-            errors 
+          success: false,
+          statusCode: 400,
+          message: "Validation failed",
+          errors: cleanErrors
         });
-    }
-
+      }
     // Handle custom API errors
     if (err.statusCode) {
         return res.status(err.statusCode).json({

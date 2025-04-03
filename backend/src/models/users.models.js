@@ -3,59 +3,62 @@ import { DataTypes } from "sequelize";
 
 
 const User = sequelize.define("User", {
-  user_id: {
+  userId: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
     primaryKey: true,
   },
 
-  user_name: {
+  userName: {
     type: DataTypes.STRING(8),
     allowNull: false,
     unique: true,
     set(value){
-        this.setDataValue('user_name',value.toLowerCase().trim())
+        this.setDataValue('userName',value.toLowerCase().trim())
     }
   },
 
-  full_name: {
+  fullName: {
     type: DataTypes.STRING(20),
-    allowNull: false,
-    
+    allowNull: false, 
   },
 
-  // avatar: {
-  //   type: DataTypes.STRING,
-  //   allowNull: true,
-  //   validate: {
-  //     isUrl: { msg: "avatar must be valid url" },
-  //     notNull: { msg: "profile image is required" },
-  //   },
-  // },
+  avatar: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notNull:{msg: "avatar is required"}
+    }
+  },
 
-  // cover_image: {
-  //   type: DataTypes.STRING,
-  //   allowNull: true,
-  //   validate: {
-  //     isUrl: { msg: "cover image should be valid url" },
-  //   },
-  // },
+  coverImage: {
+    type: DataTypes.STRING,
+    // allowNull: true,
+  },
 
   email: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+    validate:{
+      notNull:{msg:"email required"}
+    }
   },
 
 
   password: {
-    type: DataTypes.STRING(10),
+    type: DataTypes.STRING(70),
     allowNull: false,
     validate: {
-        // isNull: {msg: "password is required"},
-        len: {args: [5,10], msg: "password must min 5 and max 10 char"}
-    },
+      notNull: {
+        msg: "Password is required"
+      },
+      len: {
+        args: [1, 70],
+        msg: "Password must be between 5 and 10 characters"
+      }
+    }
   },
 
   role: {
@@ -64,10 +67,15 @@ const User = sequelize.define("User", {
     allowNull: false
   },
 
-  // refresh_token: {
-  //   type: DataTypes.STRING,
-  //   allowNull: false,
-  // },
+  isLoggedIn: {
+    type: DataTypes.BOOLEAN,
+    allowNull:false,
+    defaultValue: false
+  },
+
+  refreshToken: {
+    type: DataTypes.STRING,
+  },
 
 },{
     tableName: "users",

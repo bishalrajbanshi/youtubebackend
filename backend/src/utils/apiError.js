@@ -1,24 +1,21 @@
-class ApiError extends Error {
+class apiError extends Error {
     constructor(options) {
         const {
             statusCode = 500,
             message = "Something went wrong",
             errors = [],
-            stack = ""
-        } = typeof options === 'object' ? options : {
-            statusCode: options,
-            message: arguments[1],
-            errors: arguments[2],
-            stack: arguments[3]
-        };
+            data = null,
+            stack = null
+        } = options;
 
-        super(message);
+        super(message); 
         this.statusCode = statusCode;
         this.errors = errors;
-        this.data = null;
+        this.data = data;  
         this.message = message;
-        this.success = false;
+        this.success = false; 
 
+        // Capture stack trace if it's provided, otherwise generate one
         if (stack) {
             this.stack = stack;
         } else {
@@ -27,4 +24,4 @@ class ApiError extends Error {
     }
 }
 
-export default ApiError;
+export default apiError;
