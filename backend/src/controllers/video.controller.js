@@ -3,9 +3,8 @@ import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import db from "../models/index.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
-import { Sequelize } from "sequelize";
 
-class user_video_controller {
+class video_controller {
     /**
      * video uploader
      */
@@ -56,7 +55,8 @@ class user_video_controller {
           const newThumbnail = await uploadOnCloudinary(thumbnail);
           const newVideos = await uploadOnCloudinary(video);
           
-          const newVideo = await db.video.create({
+          //create new video
+          await db.video.create({
               title: title,
               description:description,
               videoFile: newVideos.url,
@@ -79,6 +79,82 @@ class user_video_controller {
 
 
     /**
+     * edit videos
+     */
+
+    static editVdeo = asyncHandler(async(req,res,next) => {
+        const videoId = req.params.id;
+        const userId = req.user?.userId;
+        const { title, description }= req.body;
+
+        try {
+            //validate user
+            if (!userId) {
+                throw new apiError({
+                    statusCode:400,
+                    message:"unauthorize user"
+                })
+            };
+
+            console.log("userId",userId);
+            
+            console.log("recived videoID",videoId);
+    
+            
+            const video = await db.video.findByPk(videoId);
+            console.log("video",video);
+            
+            if (!video) {
+                throw new apiError({
+                    statusCode:401,
+                    message:"video not found"
+                })
+            };
+
+            //check safe fro owner of video
+            if (video.videoOwner !== userId) {
+                throw new apiError({
+                    statusCode:"403",
+                    message:"you are unauthorize to edit video"
+                })
+            };
+            
+
+            //request  video and and thumbnail
+            const videoPath = req.files?.video?.[0].path;
+            const thumbnailPath = req.files?.thumbnail?.[0].path;
+
+            const videoLink = await uploadOnCloudinary(videoPath);
+            const thumbnailLink = await uploadOnCloudinary(thumbnailPath);
+
+            //update the model or schema
+            await db.video.update({
+                title:title || video.title,
+                description: description || video.description,
+                videoFile: videoLink?.url || video.videoFile,
+                thumnail: thumbnailLink?.url || video.thumbnail
+            },
+            {
+                where:{videoId:videoId} //passsing coloumn name and current id
+            }
+        );
+
+            return res.status(200)
+            .json(new apiResponse({
+                success:true,
+                message:"video updated"
+            }))
+
+
+
+        } catch (error) {
+            console.log(error);
+            return next(error);
+        }
+
+    })
+
+    /**
      * get video
      */
 
@@ -94,7 +170,7 @@ class user_video_controller {
             const videos = await db.video.findAll({
                 where: { videoOwner:userId },
                 include: [{       
-                 model: db.user,// over of the video 
+                 model: db.user,// owver of the video 
                   as: 'user',
                   required:true, // this is for inner join
                   attributes:["userName","fullName"]
@@ -114,4 +190,4 @@ class user_video_controller {
     })
 }
 
-export default user_video_controller;
+export default video_controller;

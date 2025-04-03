@@ -15,7 +15,7 @@ const Video = sequelize.define(
             type:DataTypes.INTEGER,
             allowNull:false,
             references:{
-                modelName:"User",
+                modelName:User,
                 key: "userId"
             },
             onDelete: "CASCADE"

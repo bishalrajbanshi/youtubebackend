@@ -3,17 +3,16 @@ import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import db from "../models/index.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
-import bcryptjs, { genSalt } from "bcryptjs";
+import bcryptjs from "bcryptjs";
+import isValidEmail from "email-validator"
 import { generateAccessToken, generateRefreshToken } from "../middlewares/generatetoknes.js";
-import { where } from "sequelize";
-import { log } from "console";
-import path from "path";
+
 
 class user_controller {
     /**
      * register user 
      */
-  static user_register = asyncHandler(async(req, res, next) => {
+  static userRegister = asyncHandler(async(req, res, next) => {
         try {
             const { username, fullname, email, password } = req.body;
            
@@ -96,7 +95,7 @@ class user_controller {
 /**
  * user login
  */
-static user_login = asyncHandler(async(req,res,next)=>{
+static userLogin = asyncHandler(async(req,res,next)=>{
         try {
             const { email, password } = req.body;
                 if (!email || !password) {
@@ -175,7 +174,7 @@ static user_login = asyncHandler(async(req,res,next)=>{
  * user loggout controller
  */
 
-static user_logout = asyncHandler(async(req,res,next) => {
+static userLogout = asyncHandler(async(req,res,next) => {
     try {
         const userId = req.user?.userId
         //validate 
@@ -215,6 +214,66 @@ static user_logout = asyncHandler(async(req,res,next) => {
             message:"loggout success"
         }))
 
+
+    } catch (error) {
+        return next(error)
+    }
+});
+
+
+/**
+ * edit users details
+ */
+
+static editDetails = asyncHandler(async(req,res,next) => {
+    const userId = req.user?.userId;
+    const { username, fullname, email } = req.body;
+    console.log("userId",userId);
+    
+    if (!userId) {
+        throw new apiError({
+            statusCode: 403,
+            message: "unauthorized user"
+        })
+    } 
+    try {
+        //find the user 
+        const existUser = await db.user.findByPk(userId);
+        if (!existUser) {
+            throw new apiError({
+                statusCode: 401,
+                message: "invalid user"
+            })
+        };
+
+        //avatar and cover image request
+        const avatarLink = req.files?.avatar?.[0].path;
+        const coverImageLink = req.files?.coverImage?.[0].path;
+
+        //upload to cloudinary
+        const profile = await uploadOnCloudinary(avatarLink);
+        const cover = await uploadOnCloudinary(coverImageLink);
+
+        //upadate in database
+         await db.user.update({
+            userName: username || existUser.userName,
+            fullName: fullname || existUser.fullName,
+            email: email || existUser.email,
+            avatar: profile?.url || existUser.avatar,
+            coverImage: cover?.url || existUser.coverImage
+        },
+    {
+        where: {userId:userId}
+    })
+
+
+
+    res.status(200)
+    .json( new apiResponse({
+        success: true,
+        message:"user updated",
+    }))
+        
 
     } catch (error) {
         return next(error)

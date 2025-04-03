@@ -13,11 +13,26 @@ router.route("/user-register").post(
             { name: "coverImage",maxCount :1}
         ]
     )
-    ,user_controller.user_register);
+    ,user_controller.userRegister);
 router.route("/get-user").get(getUsers);
+router.route("/log-in").post(user_controller.userLogin);
 
-router.route("/log-in").post(user_controller.user_login);
-router.route("/log-out").patch(verifyJwt,user_controller.user_logout)
+
+//secure toutes
+router.use(verifyJwt)
+router.route("/log-out").patch(user_controller.userLogout);
+router.route("/edit").patch(
+    upload.fields([
+        {
+            name:"avatar",
+            maxCount:1
+        },
+        {
+            name:"coverImage",
+            maxCount:1
+        }
+    ])
+    ,user_controller.editDetails);
 
 
 

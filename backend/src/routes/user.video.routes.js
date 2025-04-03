@@ -1,6 +1,6 @@
 import { Router } from "express";;
 import verifyJwt from "../middlewares/auth.middlewares.js";
-import user_video_controller from "../controllers/user.video.controller.js";
+import video_controller from "../controllers/video.controller.js";
 import upload from "../middlewares/multer.js";
 
 const router = Router();
@@ -12,9 +12,22 @@ router.route("/upload").post(
             { name: "video",maxCount:1}
         ]
     )
-    ,verifyJwt,user_video_controller.videoUpload);
+    ,verifyJwt,video_controller.videoUpload);
 
-    router.route("/all").get(verifyJwt, user_video_controller.getVideos)
+router.route("/all").get(verifyJwt, video_controller.getVideos);
+
+router.route("/edit-video/:id").post(
+    upload.fields([
+        {
+            name:"thumbnail",
+            maxCount:1
+        },
+        {
+            name:"video",
+            maxCount:1
+        }
+    ])
+    ,verifyJwt,video_controller.editVdeo)
 
 
 export default router;
