@@ -14,9 +14,9 @@ router.route("/upload").post(
     )
     ,verifyJwt,video_controller.videoUpload);
 
-router.route("/all").get(verifyJwt, video_controller.getVideos);
+router.route("/watch").get(verifyJwt, video_controller.getVideos);
 
-router.route("/edit-video/:id").post(
+router.route("/edit-video/:id").put(
     upload.fields([
         {
             name:"thumbnail",

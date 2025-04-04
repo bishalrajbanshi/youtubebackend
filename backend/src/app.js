@@ -31,12 +31,14 @@ app.use(express.static("/public"));
 app.use(cookieParser());
 
 //middleware for routes
-import user_router from "./routes/user.routers.js";
+import user_router from "./routes/user.routes.js";
 import video_router from "./routes/user.video.routes.js";
 import subscription_router from "./routes/subscrption.routes.js";
+import tweets_router from "./routes/tweets.routes.js";
 app.use("/api/v1/user",user_router);
 app.use("/api/v1/video",video_router);
 app.use("/api/v1/subscription",subscription_router);
+app.use("/api/v1/tweet",tweets_router);
 
 //global error handler
 app.use(ErrorMiddleware)

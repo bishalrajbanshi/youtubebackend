@@ -38,15 +38,22 @@ db.subscription.belongsTo(db.user,{
 });
 
 //tweets 
-db.user.hasMany(db.user, {
+db.user.hasMany(db.tweet, {
     foreignKey:"ownerId",
-    as:"tweet"
+    as:"tweets"
 });
 db.tweet.belongsTo(db.user,{
     foreignKey: "ownerId",
-    as:"owner"
+    as:"user"
+});
+db.video.hasMany(db.tweet,{
+    foreignKey:"vId",
+    as:"usertweets"
+});
+db.tweet.belongsTo(db.video, {
+    foreignKey: "vId",
+    as:"video"
 })
-
 
 
 export default db;

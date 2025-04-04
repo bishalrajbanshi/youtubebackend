@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import db from "../models/index.js";
+import { userPayload } from "../utils/excludesData.js";
 
 /**
  * Subscription controller
@@ -38,7 +39,9 @@ class subscriptions_controller {
 
     try {
       //check for channel exist
-      const channel = await db.user.findByPk(channelId);
+      const channel = await db.user.findByPk(channelId,{
+        attributes: {exclude:userPayload}
+      });
       const channelname = channel.channelName;
 
       if (!channel) {
@@ -48,7 +51,9 @@ class subscriptions_controller {
         });
       }
       //check for user exist
-      const existUser = await db.user.findByPk(userId);
+      const existUser = await db.user.findByPk(userId,{
+        attributes: {exclude: userPayload}
+      });
       if (!existUser) {
         throw new apiError({
           statusCode: 400,

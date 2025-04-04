@@ -1,6 +1,7 @@
 import { sequelize } from "../config/connectDb.js";
 import { DataTypes } from "sequelize";
 import User from "./users.models.js";
+import Video from "./users.videos.models.js";
 
 const Tweet = sequelize.define( 
     "Tweet",
@@ -16,6 +17,15 @@ const Tweet = sequelize.define(
             references: {
                 model:User,
                 key:"userId"
+            },
+            onDelete:"CASCADE"
+        },
+        vId: {
+            type: DataTypes.INTEGER,
+            allowNull:false,
+            references: {
+                model:Video,
+                key:"videoId"
             },
             onDelete:"CASCADE"
         },
