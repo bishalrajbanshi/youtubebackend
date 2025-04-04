@@ -5,10 +5,12 @@ import User from "./users.models.js";
 const Subscription = sequelize.define(
     "Subscription",
     {
-        subId: {
-            type:DataTypes.INTEGER,
-            primaryKey:true,
-            allowNull:false
+        
+        subscriptionId: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            allowNull:false,
+            autoIncrement:true
         },
         subscriber: { //my subscriber 
             type: DataTypes.INTEGER,

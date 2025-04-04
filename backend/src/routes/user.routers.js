@@ -6,7 +6,7 @@ import verifyJwt from "../middlewares/auth.middlewares.js";
 const router = Router();
 
 //user register route
-router.route("/user-register").post(
+router.route("/register").post(
     upload.fields(
         [
             { name: "avatar",maxCount:1},
@@ -20,8 +20,8 @@ router.route("/log-in").post(user_controller.userLogin);
 
 //secure toutes
 router.use(verifyJwt)
-router.route("/log-out").patch(user_controller.userLogout);
-router.route("/edit").patch(
+router.route("/log-out").put(user_controller.userLogout);
+router.route("/edit").put(
     upload.fields([
         {
             name:"avatar",

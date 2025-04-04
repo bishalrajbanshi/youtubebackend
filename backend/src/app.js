@@ -32,9 +32,11 @@ app.use(cookieParser());
 
 //middleware for routes
 import user_router from "./routes/user.routers.js";
-import user_video_router from "./routes/user.video.routes.js"
+import video_router from "./routes/user.video.routes.js";
+import subscription_router from "./routes/subscrption.routes.js";
 app.use("/api/v1/user",user_router);
-app.use("/api/v1/video",user_video_router)
+app.use("/api/v1/video",video_router);
+app.use("/api/v1/subscription",subscription_router);
 
 //global error handler
 app.use(ErrorMiddleware)

@@ -8,7 +8,7 @@ const sequelize = new Sequelize("youtubebackend","admin","bishal",{
 async function connectDb() {
     try {
         await sequelize.authenticate();
-        // await sequelize.sync({alter:true})
+        // await sequelize.sync({force:true})
         console.log("Database Connected");
     } catch (error) {
         console.error("database connection error",error);

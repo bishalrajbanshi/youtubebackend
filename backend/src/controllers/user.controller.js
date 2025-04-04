@@ -4,9 +4,8 @@ import apiResponse from "../utils/apiResponse.js";
 import db from "../models/index.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import bcryptjs from "bcryptjs";
-import isValidEmail from "email-validator"
+import * as EmailValidator from 'email-validator';
 import { generateAccessToken, generateRefreshToken } from "../middlewares/generatetoknes.js";
-
 
 class user_controller {
     /**
@@ -14,24 +13,33 @@ class user_controller {
      */
   static userRegister = asyncHandler(async(req, res, next) => {
         try {
-            const { username, fullname, email, password } = req.body;
+            const { username, channel, email, password } = req.body;
            
             // Manual validation
-            if (!username || !fullname || !email || !password) {
+            if (!username || !channel || !email || !password) {
                 throw new apiError({
                     statusCode: 400,
                     message: "VALIDATION FAILED",
                     errors: [
                       ...(!username ? [{ field: "user_name", message: "USERNAME IS REQUIRED" }] : []),
-                      ...(!fullname ? [{ field: "full_name", message: "FULL NAME IS REQUIRED" }] : []),
+                      ...(!channel ? [{ field: "full_name", message: "FULL NAME IS REQUIRED" }] : []),
                       ...(!email ? [{ field: "email", message: "EMAIL IS REQUIRED" }] : []),
                       ...(!password ?  []:[{ field: "password", message: "PASSWORD IS REQUIRED" }] )
                     ]
                 });
+            };
+
+            //calidat email
+            const validEmail = EmailValidator.validate(email);
+            if (!validEmail) {
+                throw new apiError({
+                    statusCode: 402,
+                    message: "invalid email"
+                })
             }
-    
+            
             // Check existing user
-            const existingUser = await db.user.findOne({ where: { email } });
+            const existingUser = await db.user.findOne({ where: { email:email } });
             if (existingUser) {
                 throw new apiError({
                     statusCode: 409,
@@ -65,13 +73,13 @@ class user_controller {
 
           //hash the passowrd
           const salt = await bcryptjs.genSalt(10);
-          const hashpwd = (await bcryptjs.hash(password,salt))
+          const hashpwd = await bcryptjs.hash(password,salt)
           console.log("hashed pwd",hashpwd);
           
             // Create user
-            const newUser = await db.user.create({
+        await db.user.create({
                 userName: username,
-                fullName: fullname,
+                channelName: channel,
                 email: email,
                 avatar: avatar.url,
                 coverImage: coverImage?.url || "",
@@ -145,6 +153,13 @@ static userLogin = asyncHandler(async(req,res,next)=>{
 
                 const isLoggedInUser = await db.user.findOne({
                     where: {userId: existUser.userId},
+                    include: [
+                        {
+                            model:db.subscription,
+                            as:"subscribers",
+                            attributes:["subscriber","channel"]
+                        }
+                    ],
                     attributes: { exclude: ["password", "refreshToken","createdAt","updatedAt"]}
                 });
 
@@ -227,7 +242,7 @@ static userLogout = asyncHandler(async(req,res,next) => {
 
 static editDetails = asyncHandler(async(req,res,next) => {
     const userId = req.user?.userId;
-    const { username, fullname, email } = req.body;
+    const { username, channel, email } = req.body;
     console.log("userId",userId);
     
     if (!userId) {
@@ -257,7 +272,7 @@ static editDetails = asyncHandler(async(req,res,next) => {
         //upadate in database
          await db.user.update({
             userName: username || existUser.userName,
-            fullName: fullname || existUser.fullName,
+            channelName: channel || existUser.channelName,
             email: email || existUser.email,
             avatar: profile?.url || existUser.avatar,
             coverImage: cover?.url || existUser.coverImage

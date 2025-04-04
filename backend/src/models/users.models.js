@@ -19,7 +19,7 @@ const User = sequelize.define("User", {
     }
   },
 
-  fullName: {
+  channelName: {
     type: DataTypes.STRING(20),
     allowNull: false, 
   },

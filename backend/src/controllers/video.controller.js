@@ -159,7 +159,8 @@ class video_controller {
      */
 
     static getVideos = asyncHandler(async(req,res,next) => {
-        const userId = req.user?.userId
+        const userId = req.user?.userId;
+        
         if (!userId) {
             throw new apiError({
                 statusCode: 404,
@@ -172,8 +173,8 @@ class video_controller {
                 include: [{       
                  model: db.user,// owver of the video 
                   as: 'user',
-                  required:true, // this is for inner join
-                  attributes:["userName","fullName"]
+                  // required:true, // this is for inner join
+                  attributes:["userName","channelName"]
                 }],
                 attributes:["videoId","videoFile","videoOwner","thumbnail","title","description","views","createdAt"]
               });
