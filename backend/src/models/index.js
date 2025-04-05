@@ -3,7 +3,7 @@ import User from "./user.model.js";
 import Subscription from "./subscription.model.js";
 import Comment from "./comment.model.js";
 import Tweet from "./tweet.model.js";
-import Like from "./like.controller.js";
+import Like from "./like.model.js";
 const db= {};
 
 db.user=User;

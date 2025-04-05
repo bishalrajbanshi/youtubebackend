@@ -7,13 +7,13 @@ import Tweet from "./tweet.model.js";
 
 const Like = sequelize.define("Like",{
     likeId: {
-        type: DataTypes.INTIGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
     },
     commentId: {
-        type: DataTypes.INTIGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: Comment,
@@ -22,7 +22,7 @@ const Like = sequelize.define("Like",{
         onDelete: "CASCADE"
     },
     videoId: {
-        type: DataTypes.INTIGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: Video,
@@ -31,7 +31,7 @@ const Like = sequelize.define("Like",{
         onDelete: "CASCADE"
     },
     likeBy: {
-        type: DataTypes.INTIGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: User,
@@ -40,7 +40,7 @@ const Like = sequelize.define("Like",{
         onDelete: "CASCADE"
     },
     tweetId: {
-        type: DataTypes.INTIGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: Tweet,
