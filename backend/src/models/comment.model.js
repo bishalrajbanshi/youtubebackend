@@ -2,45 +2,42 @@ import { sequelize } from "../config/connectDb.js";
 import  DataTypes  from "sequelize";
 import User from "./user.model.js";
 import Video from "./video.model.js";
+import {nanoid} from "nanoid";
 
 const Comment = sequelize.define(
     "Comment",
     {
         commentId: {
-            type:DataTypes.INTEGER,
-            primaryKey:true,
-            autoIncrement:true
+            type: DataTypes.STRING,
+            allowNull: false,
+            primaryKey: true,
+            unique: true,
+            defaultValue: () => nanoid(),
         },
         ownerId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
             references: {
                 model:User,
-                key:"userId"
-            },
+                key:"userId",
             onDelete:"CASCADE"
+            },
         },
-        vId: {
-            type: DataTypes.INTEGER,
+        videoId: {
+            type: DataTypes.STRING,
             allowNull:false,
             references: {
                 model:Video,
-                key:"videoId"
-            },
+                key:"videoId",
             onDelete:"CASCADE"
+            },
         },
         content: {
             type: DataTypes.STRING,
         }, 
     },{
         tableName:"comments",
-        timestamps: true,
-        indexes:[
-            {
-                unique:true,
-                fields:["vId","userId","content"],
-            }
-        ]
+        timestamps: true
     }
 )
 

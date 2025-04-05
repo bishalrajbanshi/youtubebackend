@@ -1,13 +1,15 @@
 import { sequelize } from "../config/connectDb.js";
 import  DataTypes  from "sequelize";
+import {nanoid} from "nanoid";
 
 
 const User = sequelize.define("User", {
   userId: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
+    type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
+    unique: true,
+    defaultValue: () => nanoid(),
   },
 
   userName: {

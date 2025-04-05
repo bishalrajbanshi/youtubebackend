@@ -3,7 +3,9 @@ import User from "./user.model.js";
 import Subscription from "./subscription.model.js";
 import Comment from "./comment.model.js";
 import Tweet from "./tweet.model.js";
-import Like from "./like.model.js";
+import VideoLike from "./video.like.model.js";
+import CommentLike from "./cmment.like.model.js";
+import TweetLike from "./tweet.like.model.js";
 const db= {};
 
 db.user=User;
@@ -11,7 +13,9 @@ db.video=Video;
 db.subscription=Subscription;
 db.comment=Comment;
 db.tweet=Tweet;
-db.like=Like;
+db.videolike=VideoLike;
+db.commentlike=CommentLike;
+db.tweetlike=TweetLike;
 
 //relation-ship 
 
@@ -51,11 +55,11 @@ db.comment.belongsTo(db.user,{
     as:"user"
 });
 db.video.hasMany(db.comment,{
-    foreignKey:"vId",
+    foreignKey:"videoId",
     as:"comments"
 });
 db.comment.belongsTo(db.video, {
-    foreignKey: "vId",
+    foreignKey: "videoId",
     as:"video"
 });
 
@@ -67,7 +71,62 @@ db.user.hasMany(db.tweet,{
 db.tweet.belongsTo(db.user, {
     foreignKey:"ownerId",
     as:"user"
-})
+});
 
+
+
+//video likes
+db.user.hasMany(db.videolike, {
+    foreignKey:"likeBy",
+    as:"userVideoLike"
+});
+db.videolike.belongsTo(db.user, {
+    foreignKey:"likeBy",
+    as:"user"
+});
+db.video.hasMany(db.videolike,{
+    foreignKey:"videoId",
+    as:"videoLikes"
+});
+db.videolike.belongsTo(db.video,{
+    foreignKey:"videoId",
+    as:"videos"
+});
+
+//comment likes
+db.user.hasMany(db.commentlike, {
+    foreignKey:"likeBy",
+    as:"userCommentLike"
+});
+db.commentlike.belongsTo(db.user, {
+    foreignKey:"likeBy",
+    as:"user"
+});
+db.comment.hasMany(db.commentlike, {
+    foreignKey:"commentId",
+    as:"commentLikes"
+});
+db.commentlike.belongsTo(db.comment, {
+    foreignKey:"commentId",
+    as:"comments"
+});
+
+//tweet likes
+db.user.hasMany(db.tweetlike, {
+    foreignKey: "likeBy",
+    as: "userTweetLike"
+});
+db.tweetlike.belongsTo(db.user, {
+    foreignKey:"likeBy",
+    as:"user"
+})
+db.tweet.hasMany(db.tweetlike, {
+    foreignKey:"tweetId",
+    as:"likes"
+});
+db.tweetlike.belongsTo(db.tweet, {
+    foreignKey:"tweetId",
+    as:"tweets"
+});
 
 export default db;

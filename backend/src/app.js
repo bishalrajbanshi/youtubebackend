@@ -36,12 +36,15 @@ import video_router from "./routes/user.video.routes.js";
 import subscription_router from "./routes/subscrption.routes.js";
 import comments_router from "./routes/comment.routes.js";
 import tweet_router from "./routes/tweet.routes.js";
+import like_router from "./routes/like.routes.js";
+
 
 app.use("/api/v1/user",user_router);
 app.use("/api/v1/video",video_router);
 app.use("/api/v1/subscription",subscription_router);
 app.use("/api/v1/comment",comments_router);
-app.use("/api/v1/tweet",tweet_router);
+app.use("/api/v1/tweets",tweet_router);
+app.use("/api/v1/like",like_router);
 //global error handler
 app.use(ErrorMiddleware)
 
