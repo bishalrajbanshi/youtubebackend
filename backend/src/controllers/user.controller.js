@@ -34,7 +34,7 @@ class user_controller {
             if (!validEmail) {
                 throw new apiError({
                     statusCode: 402,
-                    message: "invalid email"
+                    message: "VALIDATION FAILED EMAIL",
                 })
             }
             

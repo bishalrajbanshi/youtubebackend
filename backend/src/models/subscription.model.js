@@ -1,6 +1,6 @@
 import { sequelize } from "../config/connectDb.js";
-import { DataTypes } from "sequelize";
-import User from "./users.models.js";
+import DataTypes  from "sequelize";
+import User from "./user.model.js";
 
 const Subscription = sequelize.define(
     "Subscription",

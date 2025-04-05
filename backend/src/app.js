@@ -34,12 +34,14 @@ app.use(cookieParser());
 import user_router from "./routes/user.routes.js";
 import video_router from "./routes/user.video.routes.js";
 import subscription_router from "./routes/subscrption.routes.js";
-import tweets_router from "./routes/tweets.routes.js";
+import comments_router from "./routes/comment.routes.js";
+import tweet_router from "./routes/tweet.routes.js";
+
 app.use("/api/v1/user",user_router);
 app.use("/api/v1/video",video_router);
 app.use("/api/v1/subscription",subscription_router);
-app.use("/api/v1/tweet",tweets_router);
-
+app.use("/api/v1/comment",comments_router);
+app.use("/api/v1/tweet",tweet_router);
 //global error handler
 app.use(ErrorMiddleware)
 

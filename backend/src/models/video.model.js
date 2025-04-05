@@ -1,7 +1,6 @@
 import { sequelize } from "../config/connectDb.js";
-import { DataTypes } from "sequelize";
-import User from "./users.models.js";
-
+import DataTypes  from "sequelize";
+import User from "./user.model.js";
 const Video = sequelize.define(
     'Video',
     {
@@ -9,7 +8,7 @@ const Video = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
             primaryKey: true,
-            autoIncrement: true   
+            autoIncrement: true
         },
         videoOwner:{
             type:DataTypes.INTEGER,
@@ -57,6 +56,4 @@ const Video = sequelize.define(
         timestamps: true
     }
 )
-
-
 export default Video;

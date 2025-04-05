@@ -132,7 +132,7 @@ class video_controller {
                 title:title || video.title,
                 description: description || video.description,
                 videoFile: videoLink?.url || video.videoFile,
-                thumnail: thumbnailLink?.url || video.thumbnail
+                thumbail: thumbnailLink?.url || video.thumbnail
             },
             {
                 where:{videoId:videoId} //passsing coloumn name and current id

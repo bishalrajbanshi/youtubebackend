@@ -1,13 +1,17 @@
-import Video from "./users.videos.models.js";
-import User from "./users.models.js";
+import Video from "./video.model.js";
+import User from "./user.model.js";
 import Subscription from "./subscription.model.js";
-import Tweet from "./tweets.model.js";
+import Comment from "./comment.model.js";
+import Tweet from "./tweet.model.js";
+import Like from "./like.controller.js";
 const db= {};
 
 db.user=User;
 db.video=Video;
 db.subscription=Subscription;
+db.comment=Comment;
 db.tweet=Tweet;
+db.like=Like;
 
 //relation-ship 
 
@@ -34,25 +38,35 @@ db.user.hasMany(db.subscription,{ //channel have many subscriber
 
 db.subscription.belongsTo(db.user,{
     foreignKey:"channel",
-    as:"channeluser" //call model name
+    as:"user" //call model name
 });
 
-//tweets 
-db.user.hasMany(db.tweet, {
+//comments
+db.user.hasMany(db.comment, {
     foreignKey:"ownerId",
-    as:"tweets"
+    as:"comment"
 });
-db.tweet.belongsTo(db.user,{
+db.comment.belongsTo(db.user,{
     foreignKey: "ownerId",
     as:"user"
 });
-db.video.hasMany(db.tweet,{
+db.video.hasMany(db.comment,{
     foreignKey:"vId",
-    as:"usertweets"
+    as:"comments"
 });
-db.tweet.belongsTo(db.video, {
+db.comment.belongsTo(db.video, {
     foreignKey: "vId",
     as:"video"
+});
+
+//tweets
+db.user.hasMany(db.tweet,{
+    foreignKey:"ownerId",
+    as:"tweets"
+});
+db.tweet.belongsTo(db.user, {
+    foreignKey:"ownerId",
+    as:"user"
 })
 
 

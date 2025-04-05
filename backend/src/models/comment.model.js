@@ -1,12 +1,12 @@
 import { sequelize } from "../config/connectDb.js";
-import { DataTypes } from "sequelize";
-import User from "./users.models.js";
-import Video from "./users.videos.models.js";
+import  DataTypes  from "sequelize";
+import User from "./user.model.js";
+import Video from "./video.model.js";
 
-const Tweet = sequelize.define( 
-    "Tweet",
+const Comment = sequelize.define(
+    "Comment",
     {
-        tweetId: {
+        commentId: {
             type:DataTypes.INTEGER,
             primaryKey:true,
             autoIncrement:true
@@ -33,9 +33,15 @@ const Tweet = sequelize.define(
             type: DataTypes.STRING,
         }, 
     },{
-        tableName:"tweets",
+        tableName:"comments",
         timestamps: true,
+        indexes:[
+            {
+                unique:true,
+                fields:["vId","userId","content"],
+            }
+        ]
     }
 )
 
-export default Tweet
+export default Comment;
