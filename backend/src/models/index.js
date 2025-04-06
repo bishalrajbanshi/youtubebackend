@@ -6,6 +6,7 @@ import Tweet from "./tweet.model.js";
 import VideoLike from "./video.like.model.js";
 import CommentLike from "./cmment.like.model.js";
 import TweetLike from "./tweet.like.model.js";
+import Playlist from "./playlist.model.js";
 const db= {};
 
 db.user=User;
@@ -16,6 +17,7 @@ db.tweet=Tweet;
 db.videolike=VideoLike;
 db.commentlike=CommentLike;
 db.tweetlike=TweetLike;
+db.playlist=Playlist;
 
 //relation-ship 
 
@@ -127,6 +129,24 @@ db.tweet.hasMany(db.tweetlike, {
 db.tweetlike.belongsTo(db.tweet, {
     foreignKey:"tweetId",
     as:"tweets"
+});
+
+//playlist
+db.user.hasMany(db.playlist, {
+    foreignKey:"userId",
+    as:"userPlaylist"
+});
+db.playlist.belongsTo(db.user, {
+    foreignKey:"userId",
+    as:"user"
+});
+db.playlist.hasMany(db.video, {
+    foreignKey:"videoId",
+    as:"video"
+});
+db.video.belongsTo(db.playlist, {
+    foreignKey:"videoId",
+    as:"videoPlaylist"
 });
 
 export default db;

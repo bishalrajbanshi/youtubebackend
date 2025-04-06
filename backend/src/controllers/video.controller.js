@@ -2,13 +2,12 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import db from "../models/index.js";
-import uploadOnCloudinary from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 class video_controller {
     /**
      * video uploader
      */
-
     static videoUpload = asyncHandler(async(req,res,next) => {
       try {
        const { title, description, isPublished }= req.body;
@@ -101,9 +100,10 @@ class video_controller {
             console.log("recived videoID",videoId);
     
             
-            const video = await db.video.findByPk(videoId);
-            console.log("video",video);
-            
+            const video = await db.video.findOne({
+                where: {videoId: videoId}
+            })
+
             if (!video) {
                 throw new apiError({
                     statusCode:401,
@@ -192,3 +192,4 @@ class video_controller {
 }
 
 export default video_controller;
+

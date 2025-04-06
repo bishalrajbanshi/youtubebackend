@@ -33,6 +33,7 @@ router.route("/edit").put(
         }
     ])
     ,user_controller.editDetails);
+router.route("/change").put(user_controller.changePassword)
 
 
 
