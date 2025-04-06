@@ -5,7 +5,7 @@ import db from "../models/index.js";
 import { userPayload, videoPayload } from "../utils/excludesData.js";
 import models from "../models/index.js";
 /**
- * commern controller
+ * comment controller
  */
 
 class comment_controller {
@@ -16,6 +16,7 @@ class comment_controller {
     const userId = req.user?.userId;
     const videoId = req.params.videoId;
     const { comment } = req.body;
+    console.log("videoId", videoId);
 
     //vaidate video and user
     check(userId, videoId);
@@ -35,36 +36,36 @@ class comment_controller {
       if (!existUser) {
         throw new apiError({
           statusCode: 400,
-          message: "unauthorize to comment",
+          message: "unauthorized to comment",
         });
       }
-      console.log("exxist user", existUser);
+      console.log("exist user", existUser);
 
-      //video esist or comment
+      //video exist or comment
       const existVideo = await db.video.findByPk(videoId, {
         attributes: { exclude: videoPayload },
       });
-      console.log("exxist video", existVideo);
+      console.log("exist video", existVideo);
       if (!existVideo) {
         throw new apiError({
           statusCode: 400,
           message: "video not exist to comment",
         });
       }
-      const videotitle = existVideo.title;
-      console.log("title", videotitle);
+      const videoTitle = existVideo.title;
+      console.log("title", videoTitle);
 
       // create tweeets
       await db.comment.create({
         ownerId: userId,
-        vId: videoId,
+        videoId: videoId,
         content: comment,
       });
 
       res.status(200).json(
         new apiResponse({
           success: true,
-          message: `yoou commented on ${videotitle}`,
+          message: `you commented on ${videoTitle}`,
         }),
       );
     } catch (error) {
@@ -93,7 +94,7 @@ class comment_controller {
     try {
       //find comment
       const comment = await db.comment.findOne({
-        where: { commentId:commentId,ownerId: userId, vId: videoId },
+        where: { commentId:commentId,ownerId: userId, videoId: videoId },
         attributes: { exclude: ["createdAt", "updatedAt"] },
       })
         console.log("comment", comment);
@@ -133,7 +134,7 @@ class comment_controller {
       const comment = await db.comment.findOne({
         where: {
           ownerId: userId,
-          vId: videoId,
+          videoId: videoId,
         },
         include: [
           {
@@ -154,7 +155,9 @@ class comment_controller {
           message: "no tweets",
         });
       }
-      await comment.destroy();
+      await comment.destroy({
+        where: {ownerId:userId, videoId:videoId },
+      });
 
       res.status(200).json(
         new apiResponse({

@@ -1,5 +1,6 @@
  const userPayload = [
     "email",
+     "userName",
     "password",
     "isLoggedIn",
     "role",
@@ -18,9 +19,40 @@ const videoPayload = [
     "isPublished",
     "createdAt",
     "updatedAt",
-]
+];
+const hideVideoData = [
+    "updatedAt",
+    "videoOwner",
+    "description",
+    "isPublished",
+];
+ const hideCommentData = [
+     "updatedAt",
+     "ownerId",
+     "videoId"
+ ];
 
+ const hideCommentLikeData = [
+     "likeBy",
+     "commentId",
+     "updatedAt",
+ ]
+
+const hideVideoLikeData = [
+    "videoId",
+    "likeBy",
+    "updatedAt",
+     "createdAt",
+]
 export {
     userPayload,
-    videoPayload
+
+    //video
+    videoPayload,
+    hideVideoData,
+    hideVideoLikeData,
+
+    //comment
+    hideCommentData,
+    hideCommentLikeData,
 }

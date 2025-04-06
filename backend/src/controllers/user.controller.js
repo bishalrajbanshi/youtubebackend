@@ -14,7 +14,8 @@ import {
   generateRefreshToken,
 } from "../middlewares/generatetoknes.js";
 import { decode } from "jsonwebtoken";
-import {userPayload} from "../utils/excludesData.js";
+import {userPayload, hideVideoData} from "../utils/excludesData.js";
+import VideoLike from "../models/video.like.model.js";
 
 class user_controller {
   /**
@@ -165,7 +166,7 @@ class user_controller {
         {
           refreshToken: refreshToken,
           isLoggedIn: true,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         },
         {
           where: { userId: existUser.userId },
@@ -212,7 +213,7 @@ class user_controller {
   });
 
   /**
-   * user loggout controller
+   * user logout controller
    */
 
   static userLogout = asyncHandler(async (req, res, next) => {
@@ -280,41 +281,43 @@ class user_controller {
     try {
       //find the user
       const existUser = await db.user.findByPk(userId);
-        if (!existUser) {
-            throw new apiError({
-                statusCode: 401,
-                message: "invalid user",
-            });
-        }
+      if (!existUser) {
+        throw new apiError({
+          statusCode: 401,
+          message: "invalid user",
+        });
+      }
       const avatarImageLink = existUser?.avatar;
       const coverImageLink = existUser?.coverImage;
       //avatar and cover image request
       const avatarLink = req.files?.avatar?.[0].path;
       const coverLink = req.files?.coverImage?.[0].path;
       if (avatarLink && coverLink) {
-        imageAvatar(avatarImageLink)
+        imageAvatar(avatarImageLink);
         imageCover(coverImageLink);
-      } else if(coverLink) {
+      }  if (coverLink) {
         imageCover(coverImageLink);
-      }else  {
+      } if (avatarImageLink) {
         imageAvatar(avatarLink);
       }
 
       //upload to cloudinary
-      const profile =  uploadOnCloudinary(avatarLink);
-      const cover = uploadOnCloudinary(coverLink);
+      const profile = await uploadOnCloudinary(avatarLink);
+      const cover = await uploadOnCloudinary(coverLink);
 
-        //update in database
-     await db.user.update({
-        userName: username || existUser.userName,
-        channelName: channel || existUser.channelName,
-        email: email || existUser.email,
-        avatar: profile?.url || existUser.avatar,
-        coverImage: cover?.url || existUser.coverImage
-    },
-{
-    where: {userId:userId}
-})
+      //update in database
+      await db.user.update(
+        {
+          userName: username || existUser.userName,
+          channelName: channel || existUser.channelName,
+          email: email || existUser.email,
+          avatar: profile?.url || existUser.avatar,
+          coverImage: cover?.url || existUser.coverImage,
+        },
+        {
+          where: { userId: userId },
+        },
+      );
 
       res.status(200).json(
         new apiResponse({
@@ -333,14 +336,14 @@ class user_controller {
 
   static changePassword = asyncHandler(async (req, res, next) => {
     const userId = req.user?.userId;
-    const { oldPassword,newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
     console.log(oldPassword);
     console.log(newPassword);
     if (!userId) {
       throw new apiError({
         statusCode: 403,
         message: "invalid userId",
-      })
+      });
     }
     try {
       const existUser = await db.user.findOne({
@@ -358,13 +361,16 @@ class user_controller {
       }
 
       // Ensure that oldPassword is a valid string before calling bcryptjs.compare
-      const isValidPassword = await bcryptjs.compare(oldPassword, existUser.password);
+      const isValidPassword = await bcryptjs.compare(
+        oldPassword,
+        existUser.password,
+      );
       console.log("Is password valid?", isValidPassword);
       if (!isValidPassword) {
         throw new apiError({
           statusCode: 403,
           message: "invalid password",
-        })
+        });
       }
       //set new password
       const salt = await bcryptjs.genSalt(10);
@@ -372,33 +378,117 @@ class user_controller {
       console.log("password", hashed);
       //update to database
       await db.user.update(
-          { password: hashed, isLoggedIn: false, refreshToken: null },
-          {where: { userId: userId },}
-      )
-      res.status(200)
-          .json(new apiResponse({
-            success: true,
-            message: "user updated successfully",
-          }))
+        { password: hashed, isLoggedIn: false, refreshToken: null },
+        { where: { userId: userId } },
+      );
+      res.status(200).json(
+        new apiResponse({
+          success: true,
+          message: "user updated successfully",
+        }),
+      );
     } catch (error) {
       console.log("Error:", error);
+      return next(error);
+    }
+  });
+
+  /**
+   * user dashboard
+   */
+
+  static userDashboard =asyncHandler(async (req, res, next) => {
+    const userId = req.user?.userId;
+    console.log("userId", userId);
+    if(!userId) {
+      throw new apiError({
+        statusCode: 403,
+        message: "invalid userId",
+      })
+    }
+
+    try {
+      //find  videos
+      const videos = await db.video.findAll({
+        where: {videoOwner:userId},
+        attributes: {exclude:hideVideoData},
+        include: [
+          {
+            model: db.user,
+            as: "user",
+            required: true,
+            attributes:{ exclude: userPayload },
+          }
+        ]
+      });
+      if (!videos) {
+        throw new apiError({
+          statusCode: 403,
+          message: "videos not found",
+        })
+      }
+      console.log("videos",videos?.users)
+      res.status(200).json(
+          new apiResponse({
+            success: true,
+            message: "videos fetch successfully",
+            data: videos
+          })
+      )
+    }catch (error) {
       return next(error);
     }
 
   })
 
+  /**
+   * get individual video
+   */
+
+  static getVideo = asyncHandler(async (req, res, next) => {
+    const videoId = req.params.videoId;
+    console.log("videoId", videoId);
+    //validate user and video
+    if (!videoId){
+        throw new apiError({
+          statusCode: 403,
+          message: "invalid videoId",
+        })
+      }
+    try {
+      //find video
+      const video = await db.video.findOne({
+        where: {videoId:videoId},
+        attributes: {exclude:hideVideoData},
+      });
+      console.log("video", video);
+
+      res.status(200).json(
+          new apiResponse({
+            success: true,
+            message: "video fetch successfully",
+            data: video
+          })
+      )
+    }catch (error) {
+      return next(error);
+    }
+  })
+
+
 }
 export default user_controller;
 
 //validate avatar link and cover image link
- function imageCover(coverImageLink) {
-   const publicIdCover = extractPublicId(coverImageLink);
-    const deleteImage =  deleteFromCloudinary(publicIdCover);
-    console.log("delete image response", deleteImage);
+function imageCover(coverImageLink) {
+  const publicIdCover = extractPublicId(coverImageLink);
+  const deleteImage = deleteFromCloudinary(publicIdCover);
+  console.log("delete image response", deleteImage);
 }
 function imageAvatar(avatarImageLink) {
   const publicIdAvatar = extractPublicId(avatarImageLink);
   const deleteAvatar = deleteFromCloudinary(publicIdAvatar);
   console.log("delete avatar response", deleteAvatar);
 }
+
 

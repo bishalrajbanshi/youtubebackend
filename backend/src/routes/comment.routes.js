@@ -5,8 +5,8 @@ const router = Router();
 
 //secure routes
 router.use(verifyJwt);
-router.route("/:videoId").post(comment_controller.createComment);
-router.route("/delete/:videoId").delete(comment_controller.deleteComment)
+router.route("/create/:videoId").post(comment_controller.createComment);
 router.route("/edit/:videoId/:commentId").put(comment_controller.editComment);
+router.route("/delete/:videoId").delete(comment_controller.deleteComment)
 
 export default router;

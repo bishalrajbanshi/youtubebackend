@@ -32,7 +32,7 @@ app.use(cookieParser());
 
 //middleware for routes
 import user_router from "./routes/user.routes.js";
-import video_router from "./routes/user.video.routes.js";
+import video_router from "./routes/video.routes.js";
 import subscription_router from "./routes/subscrption.routes.js";
 import comments_router from "./routes/comment.routes.js";
 import tweet_router from "./routes/tweet.routes.js";

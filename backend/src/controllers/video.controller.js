@@ -2,194 +2,244 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import apiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import db from "../models/index.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
+import { extractPublicId } from "cloudinary-build-url";
+import {
+  hideCommentData,
+  hideCommentLikeData,
+  hideVideoData,
+  hideVideoLikeData,
+  userPayload
+} from "../utils/excludesData.js";
 
 class video_controller {
-    /**
-     * video uploader
-     */
-    static videoUpload = asyncHandler(async(req,res,next) => {
-      try {
-       const { title, description, isPublished }= req.body;
-        console.log(title,description,isPublished);
-          const userId = req.user?.userId;
-          console.log("userId",userId);
-          
-          if (!userId) {
-              throw new apiError({
-                  statusCode: 404,
-                  message: "unauthorize user"
-              })
-          }
-       
-          
-          if (!title || !description || !isPublished) {
-              throw new apiError({
-                  statusCode: 401,
-                  message: "all fields are required",
-              })
-          };
-  
-          //find current user
-          const currentUser = await db.user.findByPk(userId);
-          
-          if (!currentUser) {
-              throw new apiError({
-                  statusCode:400,
-                  message:"unauthorized"
-              })
-          };
-  
-          //get the video and thumbnails
-          const thumbnail = req.files?.thumbnail?.[0].path;
-          const video = req.files?.video?.[0].path;
-          if (!video) {
-              throw new apiError({
-                  statusCode: 400,
-                  message: "video required"
-              })
-          };
+  /**
+   * video uploader
+   */
+  static videoUpload = asyncHandler(async (req, res, next) => {
+    try {
+      const { title, description, isPublished } = req.body;
+      console.log(title, description, isPublished);
+      const userId = req.user?.userId;
+      console.log("userId", userId);
 
-          //upload to cloudinary
-          const newThumbnail = await uploadOnCloudinary(thumbnail);
-          const newVideos = await uploadOnCloudinary(video);
-          
-          //create new video
-          await db.video.create({
-              title: title,
-              description:description,
-              videoFile: newVideos.url,
-              thumbnail: newThumbnail?.url,
-              isPublished:isPublished,
-              videoOwner: currentUser.userId
-          });
-  
-          return res.status(201)
-          .json(new apiResponse({
-              message:"video uploaded",
-              success: true
-          }))
-  
-      } catch (error) {
-        console.log("error in uploads",error);
-        return next(error)
+      if (!userId) {
+        throw new apiError({
+          statusCode: 404,
+          message: "unauthorize user",
+        });
       }
-    });
 
+      if (!title || !description || !isPublished) {
+        throw new apiError({
+          statusCode: 401,
+          message: "all fields are required",
+        });
+      }
 
-    /**
-     * edit videos
-     */
+      //find current user
+      const currentUser = await db.user.findByPk(userId);
 
-    static editVdeo = asyncHandler(async(req,res,next) => {
-        const videoId = req.params.id;
-        const userId = req.user?.userId;
-        const { title, description }= req.body;
+      if (!currentUser) {
+        throw new apiError({
+          statusCode: 400,
+          message: "unauthorized",
+        });
+      }
 
-        try {
-            //validate user
-            if (!userId) {
-                throw new apiError({
-                    statusCode:400,
-                    message:"unauthorize user"
-                })
-            };
+      //get the video and thumbnails
+      const thumbnail = req.files?.thumbnail?.[0].path;
+      const video = req.files?.video?.[0].path;
+      if (!video) {
+        throw new apiError({
+          statusCode: 400,
+          message: "video required",
+        });
+      }
 
-            console.log("userId",userId);
-            
-            console.log("recived videoID",videoId);
-    
-            
-            const video = await db.video.findOne({
-                where: {videoId: videoId}
-            })
+      //upload to cloudinary
+      const newThumbnail = await uploadOnCloudinary(thumbnail);
+      const newVideos = await uploadOnCloudinary(video);
 
-            if (!video) {
-                throw new apiError({
-                    statusCode:401,
-                    message:"video not found"
-                })
-            };
+      //create new video
+      await db.video.create({
+        title: title,
+        description: description,
+        videoFile: newVideos.url,
+        thumbnail: newThumbnail?.url,
+        isPublished: isPublished,
+        videoOwner: currentUser.userId,
+      });
 
-            //check safe fro owner of video
-            if (video.videoOwner !== userId) {
-                throw new apiError({
-                    statusCode:"403",
-                    message:"you are unauthorize to edit video"
-                })
-            };
-            
+      return res.status(201).json(
+        new apiResponse({
+          message: "video uploaded",
+          success: true,
+        }),
+      );
+    } catch (error) {
+      console.log("error in uploads", error);
+      return next(error);
+    }
+  });
 
-            //request  video and and thumbnail
-            const videoPath = req.files?.video?.[0].path;
-            const thumbnailPath = req.files?.thumbnail?.[0].path;
+  /**
+   * edit videos
+   */
 
-            const videoLink = await uploadOnCloudinary(videoPath);
-            const thumbnailLink = await uploadOnCloudinary(thumbnailPath);
+  static editVideo = asyncHandler(async (req, res, next) => {
+    const videoId = req.params.id;
+    const userId = req.user?.userId;
+    const { title, description } = req.body;
 
-            //update the model or schema
-            await db.video.update({
-                title:title || video.title,
-                description: description || video.description,
-                videoFile: videoLink?.url || video.videoFile,
-                thumbail: thumbnailLink?.url || video.thumbnail
-            },
-            {
-                where:{videoId:videoId} //passsing coloumn name and current id
-            }
-        );
+    //validate user
+    if (!userId) {
+      throw new apiError({
+        statusCode: 400,
+        message: "unauthorize user",
+      });
+    }
+    try {
+      //find video
+      const video = await db.video.findByPk(videoId,{
+          attributes: {exclude:userPayload}
+          }
+          );
+      //request  video and and thumbnail
+      const videoPath = req.files?.video?.[0].path;
+      const thumbnailPath = req.files?.thumbnail?.[0].path;
+      if (videoPath && thumbnailPath) {
+        videoLink(videoPath);
+        thumbnailLink(thumbnailPath);
+      }
+      if (videoPath) {
+        videoLink(videoPath);
+      }
+      if(thumbnailPath) {
+        thumbnailLink(thumbnailPath);
+      }
 
-            return res.status(200)
-            .json(new apiResponse({
-                success:true,
-                message:"video updated"
-            }))
+      if (!video) {
+        throw new apiError({
+          statusCode: 401,
+          message: "video not found",
+        });
+      }
 
+      //check safe for owner of video
+      if (video.videoOwner !== userId) {
+        throw new apiError({
+          statusCode: "403",
+          message: "you are unauthorized to edit video",
+        });
+      }
 
+      const videoLinkPath = await uploadOnCloudinary(videoPath);
+      const thumbnailLinkPath = await uploadOnCloudinary(thumbnailPath);
 
-        } catch (error) {
-            console.log(error);
-            return next(error);
-        }
+      //update the model or schema
+      await db.video.update(
+        {
+          title: title || video.title,
+          description: description || video.description,
+          videoFile: videoLinkPath?.url || video.videoFile,
+          thumbnail: thumbnailLinkPath?.url || video.thumbnail,
+        },
+        {
+          where: { videoId: videoId }, //passsing coloumn name and current id
+        },
+      );
 
-    })
+      return res.status(200).json(
+        new apiResponse({
+          success: true,
+          message: "video updated",
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+      return next(error);
+    }
+  });
 
-    /**
-     * get video
-     */
+  /**
+   * get video
+   */
 
-    static getVideos = asyncHandler(async(req,res,next) => {
-        const userId = req.user?.userId;
-        
-        if (!userId) {
-            throw new apiError({
-                statusCode: 404,
-                message: "unauthorize user not found"
-            })
-        };
-        try {
-            const videos = await db.video.findAll({
-                where: { videoOwner:userId },
-                include: [{       
-                 model: db.user,// owver of the video 
-                  as: 'user',
-                  // required:true, // this is for inner join
-                  attributes:["userName","channelName"]
-                }],
-                attributes:["videoId","videoFile","videoOwner","thumbnail","title","description","views","createdAt"]
-              });
+  static getVideo = asyncHandler(async (req, res, next) => {
+    const videoId = req.params.videoId;
 
-            return res.status(200).json(new apiResponse({
-                success: true,
-                statusCode: 200,
-                data: videos,
-                message: "User's videos list",
-            }));
-        } catch (error) {
-            return next(error)
-        }
-    })
+    if (!videoId) {
+      throw new apiError({
+        statusCode: 404,
+        message: "video not found",
+      });
+    }
+    try {
+      const video = await db.video.findOne({
+        where: { videoId: videoId },
+        attributes: {exclude: hideVideoData},
+        include: [
+          {
+            model: db.user,
+            as: "user",
+            attributes:{ exclude: userPayload },
+          },
+          {
+            model: db.videolike,
+            as: "videoLikes",
+            attributes: {exclude: hideVideoLikeData}
+          },
+          {
+            model: db.comment,
+            as: "comments",
+            attributes: {exclude: hideCommentData},
+            include :[
+              {
+                model: db.commentlike,
+                as: "commentLikes",
+                attributes: {exclude: hideCommentLikeData},
+                include :[
+                  {
+                    model: db.user,
+                    as: "user",
+                    attributes:{ exclude:userPayload },
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+      });
+
+      return res.status(200).json(
+        new apiResponse({
+          success: true,
+          statusCode: 200,
+          data: video,
+          message: "User's videos list",
+        }),
+      );
+    } catch (error) {
+      return next(error);
+    }
+  });
 }
 
 export default video_controller;
 
+function videoLink(videoUrl) {
+  const videoPublicId = extractPublicId(videoUrl);
+  const deleteVideo = deleteFromCloudinary(videoPublicId);
+  console.log(deleteVideo);
+  return deleteVideo;
+}
+function thumbnailLink(thumbnailUrl) {
+  const thumbnailPublicId = extractPublicId(thumbnailUrl);
+  const deleteThumbnail = deleteFromCloudinary(thumbnailPublicId);
+  console.log(deleteThumbnail);
+  return deleteThumbnail;
+}

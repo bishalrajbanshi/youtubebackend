@@ -14,7 +14,6 @@ router.route("/upload").post(
     )
     ,verifyJwt,video_controller.videoUpload);
 
-router.route("/watch").get(verifyJwt, video_controller.getVideos);
 
 router.route("/edit-video/:id").put(
     upload.fields([
@@ -27,7 +26,8 @@ router.route("/edit-video/:id").put(
             maxCount:1
         }
     ])
-    ,verifyJwt,video_controller.editVdeo)
+    ,verifyJwt,video_controller.editVideo)
 
+router.route("/watch/:videoId").get( video_controller.getVideo);
 
 export default router;

@@ -3,17 +3,18 @@ import Database from "sequelize";
 import DataTypes from "sequelize";
 import User from "./user.model.js";
 import Comment from "./comment.model.js";
-import {nanoid} from "nanoid";
+import { nanoid } from "nanoid";
+import Video from "sequelize";
 
 const CommentLike = sequelize.define(
   "CommentLike",
   {
     likeId: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        primaryKey: true,
-        unique: true,
-        defaultValue: () => nanoid(),
+      type: DataTypes.STRING,
+      allowNull: false,
+      primaryKey: true,
+      unique: true,
+      defaultValue: () => nanoid(),
     },
     likeBy: {
       type: DataTypes.STRING,
@@ -32,7 +33,7 @@ const CommentLike = sequelize.define(
         key: "commentId",
         onDelete: "CASCADE",
       },
-    },
+    }
   },
   { tableName: "commentlikes", timestamps: true },
 );
