@@ -4,7 +4,6 @@
     "password",
     "isLoggedIn",
     "role",
-    "avatar",
     "coverImage",
     "refreshToken",
     "createdAt",

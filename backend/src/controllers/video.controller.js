@@ -181,37 +181,30 @@ class video_controller {
     try {
       const video = await db.video.findOne({
         where: { videoId: videoId },
-        attributes: {exclude: hideVideoData},
+        attributes: { exclude: hideVideoData },
         include: [
           {
             model: db.user,
             as: "user",
-            attributes:{ exclude: userPayload },
+            attributes: { exclude: userPayload },
           },
           {
             model: db.videolike,
             as: "videoLikes",
-            attributes: {exclude: hideVideoLikeData}
+            attributes: { exclude: hideVideoLikeData },
           },
           {
             model: db.comment,
             as: "comments",
-            attributes: {exclude: hideCommentData},
-            include :[
+            attributes: { exclude: hideCommentData },
+            include: [
               {
-                model: db.commentlike,
-                as: "commentLikes",
-                attributes: {exclude: hideCommentLikeData},
-                include :[
-                  {
-                    model: db.user,
-                    as: "user",
-                    attributes:{ exclude:userPayload },
-                  }
-                ]
-              }
-            ]
-          }
+                model: db.user,
+                as: "user",
+                attributes: { exclude: userPayload },
+              },
+            ],
+          },
         ],
       });
 
@@ -243,3 +236,17 @@ function thumbnailLink(thumbnailUrl) {
   console.log(deleteThumbnail);
   return deleteThumbnail;
 }
+// include :[
+//   {
+//     model: db.commentlike,
+//     as: "commentLikes",
+//     attributes: {exclude: hideCommentLikeData},
+//     include :[
+//       {
+//         model: db.user,
+//         as: "user",
+//         attributes:{ exclude:userPayload },
+//       }
+//     ]
+//   }
+// ]
