@@ -202,17 +202,45 @@ class video_controller {
                 model: db.user,
                 as: "user",
                 attributes: { exclude: userPayload },
+
               },
-            ],
+              {
+                model: db.commentlike,
+                as: "commentLikes",
+                attributes: { exclude: hideCommentLikeData },
+              }
+            ]
           },
         ],
       });
+
+      const videoData = video.toJSON();
+     videoData.comments = videoData.comments.map(
+       ({ commentLikes, ...comment }) => {
+         return {
+           ...comment,
+           likeCount: commentLikes ? commentLikes.length : 0,
+         };
+       },
+     );
+
+      videoData.videoLikes = videoData.videoLikes.map(
+          ({ likeId, ...videolike }) => {
+            return {
+              ...videolike,
+              likeCount: videolike ? 1 : 0,
+            };
+          }
+      );
+
+
+
 
       return res.status(200).json(
         new apiResponse({
           success: true,
           statusCode: 200,
-          data: video,
+          data: videoData,
           message: "User's videos list",
         }),
       );
@@ -250,3 +278,5 @@ function thumbnailLink(thumbnailUrl) {
 //     ]
 //   }
 // ]
+
+

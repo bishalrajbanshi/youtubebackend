@@ -35,6 +35,7 @@ const hideVideoData = [
      "likeBy",
      "commentId",
      "updatedAt",
+     "createdAt"
  ]
 
 const hideVideoLikeData = [
