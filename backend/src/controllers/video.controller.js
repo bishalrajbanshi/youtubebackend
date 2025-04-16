@@ -219,19 +219,13 @@ class video_controller {
        ({ commentLikes, ...comment }) => {
          return {
            ...comment,
-           likeCount: commentLikes ? commentLikes.length : 0,
+           commentLike: commentLikes ? commentLikes.length : 0,
          };
        },
      );
 
-      videoData.videoLikes = videoData.videoLikes.map(
-          ({ likeId, ...videolike }) => {
-            return {
-              ...videolike,
-              likeCount: videolike ? 1 : 0,
-            };
-          }
-      );
+  videoData.videoLike = videoData.videoLikes.length;
+  delete videoData.videoLikes;
 
 
 
